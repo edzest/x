@@ -11,7 +11,7 @@ import (
 type Test struct {
 	ID               string `json:"id"`
 	Name             string `json:"name"`
-	ShortDescription string `json:"short_description"`
+	ShortDescription string `json:"shortDescription"`
 	Description      string `json:"description"`
 	QuestionMetadata `json:"metadata"`
 	Instructions     `json:"instructions"`
@@ -21,9 +21,9 @@ type Test struct {
 
 // QuestionMetadata contains the summary of the test.
 type QuestionMetadata struct {
-	TotalQuestions int8  `json:"total_questions"`
-	TotalMarks     int8  `json:"total_marks"`
-	TotalTime      int16 `json:"total_time"`
+	TotalQuestions int8  `json:"totalQuestions"`
+	TotalMarks     int8  `json:"totalMarks"`
+	TotalTime      int16 `json:"totalTime"`
 }
 
 // Test instructions stored as rich text html.
@@ -46,8 +46,8 @@ type Option struct {
 
 // Answer contains id of question and its correct option.
 type Answer struct {
-	QId string `json:"q_id"`
-	AId string `json:"a_id"`
+	QId string `json:"qId"`
+	AId string `json:"aId"`
 }
 
 // Custom func to omit Answers while marshalling a Test
@@ -55,7 +55,7 @@ func (t Test) MarshalJSON() ([]byte, error) {
 	var tmp struct {
 		ID               string `json:"id"`
 		Name             string `json:"name"`
-		ShortDescription string `json:"short_description"`
+		ShortDescription string `json:"shortDescription"`
 		Description      string `json:"description"`
 		QuestionMetadata `json:"metadata"`
 		Instructions     `json:"instructions"`

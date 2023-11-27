@@ -15,5 +15,6 @@ func main() {
 		port = ":" + os.Getenv("PORT")
 	}
 	srv := server.NewHTTPServer(port)
+	log.Printf("Starting server on port %s", port)
 	log.Fatal(srv.ListenAndServe())
 }
