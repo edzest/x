@@ -10,8 +10,9 @@ import (
 func NewHTTPServer(addr string) *http.Server {
 	httpsrv := newHTTPServer()
 	r := mux.NewRouter()
-	r.HandleFunc("/", httpsrv.handleCreateTest).Methods("POST")
-	r.HandleFunc("/", httpsrv.handleGetTest).Methods("GET")
+	r.HandleFunc("/tests", httpsrv.handleCreateTest).Methods("POST")
+	r.HandleFunc("/tests/{id}", httpsrv.handleGetTest).Methods("GET")
+	r.HandleFunc("/tests/{id}:evaluate", httpsrv.handleEvaluateTest).Methods("POST")
 
 	return &http.Server{
 		Addr:    addr,
@@ -20,7 +21,8 @@ func NewHTTPServer(addr string) *http.Server {
 }
 
 type httpServer struct {
-	Db *DB
+	Db          *DB
+	evalService *EvaluationService
 }
 
 func newHTTPServer() *httpServer {
@@ -30,9 +32,9 @@ func newHTTPServer() *httpServer {
 }
 
 func (s *httpServer) handleGetTest(w http.ResponseWriter, r *http.Request) {
-	params := r.URL.Query()
-	ids := params["id"]
-	t, err := s.Db.get(ids[0])
+	vars := mux.Vars(r)
+	id := vars["id"]
+	t, err := s.Db.get(id)
 	if err == ErrorTestNotFound {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -54,4 +56,29 @@ func (s *httpServer) handleCreateTest(w http.ResponseWriter, r *http.Request) {
 	}
 	s.Db.insert(t)
 	w.WriteHeader(http.StatusOK)
+}
+
+func (s *httpServer) handleEvaluateTest(w http.ResponseWriter, r *http.Request) {
+	var t TestEvalRequest
+
+	vars := mux.Vars(r)
+	id := vars["id"]
+	t.TestId = id
+
+	var answers []Answer
+	err := json.NewDecoder(r.Body).Decode(&answers)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	t.Answers = answers
+
+	res := s.evalService.evaluate(t)
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	err = json.NewEncoder(w).Encode(res)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
