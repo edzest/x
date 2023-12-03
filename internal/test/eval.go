@@ -1,4 +1,4 @@
-package server
+package test
 
 type EvaluationService struct{}
 

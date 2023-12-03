@@ -1,4 +1,4 @@
-package server
+package test
 
 import (
 	"encoding/json"
@@ -71,7 +71,14 @@ func (t Test) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&tmp)
 }
 
-// Temporary in memory db.
+// TestStore is an interface that provides reading and writing
+// a test in a database.
+type TestStore interface {
+	insert(t Test)
+	get(id string) (Test, error)
+}
+
+// Temporary in memory db satisfies TestStore interface.
 type DB struct {
 	records map[string]Test
 }
