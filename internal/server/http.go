@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -13,6 +14,8 @@ func NewHTTPServer(addr string) *http.Server {
 	r.HandleFunc("/tests", httpsrv.handleCreateTest).Methods("POST")
 	r.HandleFunc("/tests/{id}", httpsrv.handleGetTest).Methods("GET")
 	r.HandleFunc("/tests/{id}:evaluate", httpsrv.handleEvaluateTest).Methods("POST")
+
+	r.HandleFunc("/health", handleHealthCheck)
 
 	return &http.Server{
 		Addr:    addr,
@@ -81,4 +84,9 @@ func (s *httpServer) handleEvaluateTest(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func handleHealthCheck(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	fmt.Fprintln(w, `{"status":"ok"}`)
 }
