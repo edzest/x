@@ -14,7 +14,7 @@ type testHandler struct {
 
 func NewHttpHandler() *testHandler {
 	return &testHandler{
-		testStore: NewDB(),
+		testStore: NewTempTestDB(),
 	}
 }
 

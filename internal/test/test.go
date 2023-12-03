@@ -2,7 +2,6 @@ package test
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 // Test is the primary object of this server and contains the id, name
@@ -69,35 +68,4 @@ func (t Test) MarshalJSON() ([]byte, error) {
 	tmp.Instructions = t.Instructions
 	tmp.Questions = t.Questions
 	return json.Marshal(&tmp)
-}
-
-// TestStore is an interface that provides reading and writing
-// a test in a database.
-type TestStore interface {
-	insert(t Test)
-	get(id string) (Test, error)
-}
-
-// Temporary in memory db satisfies TestStore interface.
-type DB struct {
-	records map[string]Test
-}
-
-func NewDB() *DB {
-	return &DB{
-		make(map[string]Test),
-	}
-}
-
-var ErrorTestNotFound = fmt.Errorf("test not found")
-
-func (db *DB) insert(t Test) {
-	db.records[t.ID] = t
-}
-
-func (db *DB) get(id string) (Test, error) {
-	if t, ok := db.records[id]; ok {
-		return t, nil
-	}
-	return Test{}, ErrorTestNotFound
 }
