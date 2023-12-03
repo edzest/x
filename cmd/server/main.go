@@ -1,20 +1,26 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 
 	"edzest.org/x/internal/server"
 )
 
+var portFlag = flag.String("port", "8080", "port to listen")
+
 func main() {
-	var port string
-	if os.Getenv("PORT") == "" {
-		port = ":8080"
-	} else {
-		port = ":" + os.Getenv("PORT")
+	flag.Parse()
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = *portFlag
 	}
-	srv := server.NewHTTPServer(port)
-	log.Printf("Starting server on port %s", port)
+
+	addr := ":" + port
+
+	srv := server.NewHTTPServer(addr)
+	log.Printf("Starting server on address %s", addr)
 	log.Fatal(srv.ListenAndServe())
 }
