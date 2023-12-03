@@ -2,11 +2,18 @@ package test
 
 import "fmt"
 
-// TestStore is an interface that provides reading and writing
-// a Test in a datastore.
+// TestStore is an interface that provides reading from and writing to
+// a datastore.
 type TestStore interface {
 	insert(t Test)
 	get(id string) (Test, error)
+}
+
+var db map[string]Test
+
+// Initialises a global map of tests
+func init() {
+	db = make(map[string]Test)
 }
 
 // TempTestDb is an in-memory DB that satisfies TestStore interface.
@@ -16,7 +23,7 @@ type TempTestDB struct {
 
 func NewTempTestDB() *TempTestDB {
 	return &TempTestDB{
-		make(map[string]Test),
+		records: db,
 	}
 }
 

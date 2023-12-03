@@ -43,7 +43,7 @@ type Option struct {
 	Text string `json:"text"`
 }
 
-// Answer contains id of question and its correct option.
+// Answer contains ids of question and its correct option.
 type Answer struct {
 	QId string `json:"qId"`
 	AId string `json:"aId"`
@@ -68,4 +68,13 @@ func (t Test) MarshalJSON() ([]byte, error) {
 	tmp.Instructions = t.Instructions
 	tmp.Questions = t.Questions
 	return json.Marshal(&tmp)
+}
+
+func (t Test) getAnswer(qid string) (string, bool) {
+	for _, q := range t.Answers {
+		if q.QId == qid {
+			return q.AId, true
+		}
+	}
+	return "", false
 }

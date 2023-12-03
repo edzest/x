@@ -14,7 +14,8 @@ type testHandler struct {
 
 func NewHttpHandler() *testHandler {
 	return &testHandler{
-		testStore: NewTempTestDB(),
+		testStore:   NewTempTestDB(),
+		evalService: NewEvaluationService(),
 	}
 }
 
@@ -60,7 +61,12 @@ func (h *testHandler) EvaluateTest(w http.ResponseWriter, r *http.Request) {
 	}
 	t.Answers = answers
 
-	res := h.evalService.evaluate(t)
+	res, err := h.evalService.evaluate(t)
+
+	if err == ErrorTestNotFound {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	err = json.NewEncoder(w).Encode(res)
