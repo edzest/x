@@ -12,6 +12,7 @@ import (
 func NewHTTPServer(addr string) *http.Server {
 	th := test.NewHttpHandler()
 	r := mux.NewRouter()
+	r.Use(auth)
 	r.HandleFunc("/tests", th.CreateTest).Methods("POST")
 	r.HandleFunc("/tests/{id}", th.GetTest).Methods("GET")
 	r.HandleFunc("/tests/{id}:evaluate", th.EvaluateTest).Methods("POST")
