@@ -19,6 +19,27 @@ func NewHttpHandler() *testHandler {
 	}
 }
 
+// ListTests returns a list of all tests.
+// todo: Add pagination params.
+func (h *testHandler) ListTests(w http.ResponseWriter, r *http.Request) {
+	tests, err := h.testStore.list()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	res := ListTestsResponse{
+		Tests: tests,
+		Total: len(tests),
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	err = json.NewEncoder(w).Encode(res)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 func (h *testHandler) GetTest(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -74,4 +95,10 @@ func (h *testHandler) EvaluateTest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+// ListTestsResponse is the response returned by ListTests handler.
+type ListTestsResponse struct {
+	Tests []Test `json:"tests"`
+	Total int    `json:"total"`
 }
