@@ -10,11 +10,11 @@ type TestStore interface {
 	list() ([]Test, error)
 }
 
-var db map[string]Test
+var memDb map[string]Test
 
 // Initialises a global map of tests
 func init() {
-	db = make(map[string]Test)
+	memDb = make(map[string]Test)
 }
 
 // TempTestDb is an in-memory DB that satisfies TestStore interface.
@@ -24,7 +24,7 @@ type TempTestDB struct {
 
 func NewTempTestDB() *TempTestDB {
 	return &TempTestDB{
-		records: db,
+		records: memDb,
 	}
 }
 
