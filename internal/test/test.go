@@ -1,7 +1,5 @@
 package test
 
-import "encoding/json"
-
 // Test is the primary object of this server and contains the id, name
 // and description of test along with the list of questions and their
 // correct answers.
@@ -14,6 +12,18 @@ type Test struct {
 	Instructions     `json:"instructions"`
 	Questions        []Question `json:"questions"`
 	Answers          []Answer   `json:"answers"`
+}
+
+// TestWithoutAnswers is the same as Test but without the answers.
+// Used to send the test to the client.
+type TestWithoutAnswers struct {
+	ID               string `json:"id"`
+	Name             string `json:"name"`
+	ShortDescription string `json:"shortDescription"`
+	Description      string `json:"description"`
+	QuestionMetadata `json:"metadata"`
+	Instructions     `json:"instructions"`
+	Questions        []Question `json:"questions"`
 }
 
 // QuestionMetadata contains the summary of the test.
@@ -47,27 +57,6 @@ type Answer struct {
 	AId string `json:"aId"`
 }
 
-// Custom func to omit Answers while marshalling a Test
-func (t Test) MarshalJSON() ([]byte, error) {
-	var tmp struct {
-		ID               string `json:"id"`
-		Name             string `json:"name"`
-		ShortDescription string `json:"shortDescription"`
-		Description      string `json:"description"`
-		QuestionMetadata `json:"metadata"`
-		Instructions     `json:"instructions"`
-		Questions        []Question `json:"questions"`
-	}
-	tmp.ID = t.ID
-	tmp.Name = t.Name
-	tmp.ShortDescription = t.ShortDescription
-	tmp.Description = t.Description
-	tmp.QuestionMetadata = t.QuestionMetadata
-	tmp.Instructions = t.Instructions
-	tmp.Questions = t.Questions
-	return json.Marshal(&tmp)
-}
-
 func (t Test) getAnswer(qid string) (string, bool) {
 	for _, q := range t.Answers {
 		if q.QId == qid {
@@ -75,4 +64,25 @@ func (t Test) getAnswer(qid string) (string, bool) {
 		}
 	}
 	return "", false
+}
+
+func (t Test) removeAnswers() TestWithoutAnswers {
+	var tmp TestWithoutAnswers
+	tmp.ID = t.ID
+	tmp.Name = t.Name
+	tmp.ShortDescription = t.ShortDescription
+	tmp.Description = t.Description
+	tmp.QuestionMetadata = t.QuestionMetadata
+	tmp.Instructions = t.Instructions
+	tmp.Questions = t.Questions
+	return tmp
+}
+
+// removeAnswersFromTests is a helper function that removes answers from a slice of Tests.
+func removeAnswersFromTests(tests []Test) []TestWithoutAnswers {
+	var tmp []TestWithoutAnswers
+	for _, t := range tests {
+		tmp = append(tmp, t.removeAnswers())
+	}
+	return tmp
 }

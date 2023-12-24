@@ -6,13 +6,9 @@ type EvaluationService struct {
 	testStore TestStore
 }
 
-func NewEvaluationService() *EvaluationService {
-	client, err := initializeFirebaseDb()
-	if err != nil {
-		log.Fatal("error initializing firebase db client:", err)
-	}
+func NewEvaluationService(testStore TestStore) *EvaluationService {
 	return &EvaluationService{
-		testStore: NewFbTestDB(client),
+		testStore: testStore,
 	}
 }
 

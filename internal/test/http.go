@@ -19,9 +19,10 @@ func NewHttpHandler() (*testHandler, error) {
 		log.Fatal("error initializing firebase db client:", err)
 		return nil, err
 	}
+	testStore := NewFbTestDB(client)
 	return &testHandler{
-		testStore:   NewFbTestDB(client),
-		evalService: NewEvaluationService(),
+		testStore:   testStore,
+		evalService: NewEvaluationService(testStore),
 	}, nil
 }
 
@@ -33,9 +34,10 @@ func (h *testHandler) ListTests(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	res := ListTestsResponse{
-		Tests: tests,
-		Total: len(tests),
+		TestsWithoutAnswers: removeAnswersFromTests(tests),
+		Total:               len(tests),
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -55,7 +57,7 @@ func (h *testHandler) GetTest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	err = json.NewEncoder(w).Encode(t)
+	err = json.NewEncoder(w).Encode(t.removeAnswers())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -105,6 +107,6 @@ func (h *testHandler) EvaluateTest(w http.ResponseWriter, r *http.Request) {
 
 // ListTestsResponse is the response returned by ListTests handler.
 type ListTestsResponse struct {
-	Tests []Test `json:"tests"`
-	Total int    `json:"total"`
+	TestsWithoutAnswers []TestWithoutAnswers `json:"tests"`
+	Total               int                  `json:"total"`
 }
