@@ -7,6 +7,7 @@ import "fmt"
 type TestStore interface {
 	insert(t Test)
 	get(id string) (Test, error)
+	list() ([]Test, error)
 }
 
 var db map[string]Test
@@ -38,4 +39,12 @@ func (db *TempTestDB) get(id string) (Test, error) {
 		return t, nil
 	}
 	return Test{}, ErrorTestNotFound
+}
+
+func (db *TempTestDB) list() ([]Test, error) {
+	var tests []Test = make([]Test, 0)
+	for _, v := range db.records {
+		tests = append(tests, v)
+	}
+	return tests, nil
 }
