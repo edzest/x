@@ -1,8 +1,6 @@
 package test
 
-import (
-	"encoding/json"
-)
+import "encoding/json"
 
 // Test is the primary object of this server and contains the id, name
 // and description of test along with the list of questions and their

@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"edzest.org/x/internal/test"
@@ -10,7 +11,11 @@ import (
 )
 
 func NewHTTPServer(addr string) *http.Server {
-	th := test.NewHttpHandler()
+	th, err := test.NewHttpHandler()
+	if err != nil {
+		log.Fatal("error initializing http handler:", err)
+		return nil
+	}
 	r := mux.NewRouter()
 	r.Use(auth)
 	r.HandleFunc("/tests", th.ListTests).Methods("GET")

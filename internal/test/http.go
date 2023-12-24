@@ -2,6 +2,7 @@ package test
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -12,11 +13,16 @@ type testHandler struct {
 	evalService *EvaluationService
 }
 
-func NewHttpHandler() *testHandler {
-	return &testHandler{
-		testStore:   NewTempTestDB(),
-		evalService: NewEvaluationService(),
+func NewHttpHandler() (*testHandler, error) {
+	client, err := initializeFirebaseDb()
+	if err != nil {
+		log.Fatal("error initializing firebase db client:", err)
+		return nil, err
 	}
+	return &testHandler{
+		testStore:   NewFbTestDB(client),
+		evalService: NewEvaluationService(),
+	}, nil
 }
 
 // ListTests returns a list of all tests.
