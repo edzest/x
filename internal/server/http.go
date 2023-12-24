@@ -17,13 +17,15 @@ func NewHTTPServer(addr string) *http.Server {
 		return nil
 	}
 	r := mux.NewRouter()
-	r.Use(auth)
-	r.HandleFunc("/tests", th.ListTests).Methods("GET")
-	r.HandleFunc("/tests", th.CreateTest).Methods("POST")
-	r.HandleFunc("/tests/{id}", th.GetTest).Methods("GET")
-	r.HandleFunc("/tests/{id}:evaluate", th.EvaluateTest).Methods("POST")
 
 	r.HandleFunc("/health", handleHealthCheck)
+
+	tr := r.PathPrefix("/tests").Subrouter()
+	tr.HandleFunc("", th.ListTests).Methods("GET")
+	tr.HandleFunc("", th.CreateTest).Methods("POST")
+	tr.HandleFunc("/{id}", th.GetTest).Methods("GET")
+	tr.HandleFunc("/{id}:evaluate", th.EvaluateTest).Methods("POST")
+	tr.Use(auth)
 
 	return &http.Server{
 		Addr:    addr,
@@ -32,6 +34,7 @@ func NewHTTPServer(addr string) *http.Server {
 }
 
 func handleHealthCheck(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	fmt.Fprintln(w, `{"status":"ok"}`)
 }
