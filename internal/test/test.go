@@ -11,19 +11,24 @@ type Test struct {
 	QuestionMetadata `json:"metadata"`
 	Instructions     `json:"instructions"`
 	Questions        []Question `json:"questions"`
-	Answers          []Answer   `json:"answers"`
 }
 
 // TestWithoutAnswers is the same as Test but without the answers.
 // Used to send the test to the client.
 type TestWithoutAnswers struct {
-	ID               string `json:"id"`
-	Name             string `json:"name"`
-	ShortDescription string `json:"shortDescription"`
-	Description      string `json:"description"`
-	QuestionMetadata `json:"metadata"`
-	Instructions     `json:"instructions"`
-	Questions        []Question `json:"questions"`
+	ID                     string `json:"id"`
+	Name                   string `json:"name"`
+	ShortDescription       string `json:"shortDescription"`
+	Description            string `json:"description"`
+	QuestionMetadata       `json:"metadata"`
+	Instructions           `json:"instructions"`
+	QuestionsWithoutAnswer []QuestionWithoutAnswer `json:"questions"`
+}
+
+type QuestionWithoutAnswer struct {
+	ID      string   `json:"id"`
+	Text    string   `json:"text"`
+	Options []Option `json:"options"`
 }
 
 // QuestionMetadata contains the summary of the test.
@@ -40,30 +45,17 @@ type Instructions struct {
 
 // Question contains text of the question and its answers.
 type Question struct {
-	ID      string   `json:"id"`
-	Text    string   `json:"text"`
-	Options []Option `json:"options"`
+	ID              string   `json:"id"`
+	Text            string   `json:"text"`
+	Options         []Option `json:"options"`
+	CorrectOptionId string   `json:"correctOptionId"`
+	Explanation     string   `json:"explanation"`
 }
 
 // ID and text of an option.
 type Option struct {
 	ID   string `json:"id"`
 	Text string `json:"text"`
-}
-
-// Answer contains ids of question and its correct option.
-type Answer struct {
-	QId string `json:"qId"`
-	AId string `json:"aId"`
-}
-
-func (t Test) getAnswer(qid string) (string, bool) {
-	for _, q := range t.Answers {
-		if q.QId == qid {
-			return q.AId, true
-		}
-	}
-	return "", false
 }
 
 func (t Test) removeAnswers() TestWithoutAnswers {
@@ -74,7 +66,16 @@ func (t Test) removeAnswers() TestWithoutAnswers {
 	tmp.Description = t.Description
 	tmp.QuestionMetadata = t.QuestionMetadata
 	tmp.Instructions = t.Instructions
-	tmp.Questions = t.Questions
+	tmp.QuestionsWithoutAnswer = []QuestionWithoutAnswer{}
+	for _, q := range t.Questions {
+		questionWithoutAnswer := QuestionWithoutAnswer{
+			ID:      q.ID,
+			Text:    q.Text,
+			Options: q.Options,
+		}
+		tmp.QuestionsWithoutAnswer = append(tmp.QuestionsWithoutAnswer, questionWithoutAnswer)
+	}
+
 	return tmp
 }
 
