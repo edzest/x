@@ -82,13 +82,13 @@ func (h *testHandler) EvaluateTest(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 	t.TestId = id
 
-	var answers []Answer
-	err := json.NewDecoder(r.Body).Decode(&answers)
+	var selectedAnswers map[string]string
+	err := json.NewDecoder(r.Body).Decode(&selectedAnswers)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	t.Answers = answers
+	t.SelectedAnswers = selectedAnswers
 
 	res, err := h.evalService.evaluate(t)
 
